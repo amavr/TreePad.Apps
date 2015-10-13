@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Test title</title>
+    <link rel="stylesheet" href="css/bootstrap.min.css" type="text/css">
+    <link rel="stylesheet" href="css/window.css" type="text/css">
+    <script type="text/javascript" src="js/jquery-1.11.3.min.js"></script>
+    <script type="text/javascript" src="js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="js/gdocs.js"></script>
+    <script type="text/javascript" src="js/window.js"></script>
+  </head>
+  <body>
+    <div id="toolbar" class="btn-group" role="group" aria-label="...">
+        <button id="btn-open" type="button" class="btn btn-default">
+            <span id="btn-open-in" class="glyphicon glyphicon-folder-open" aria-hidden="true" title="Open"></span>
+        </button>
+        <button id="btn-save" type="button" class="btn btn-default">
+            <span class="glyphicon glyphicon-floppy-disk" aria-hidden="true" title="Save"></span>
+        </button>
+        <button id="btn-saveas" type="button" class="btn btn-default" data-toggle="modal" data-target="#dialogSave" data-filename="new file">
+            <span class="glyphicon glyphicon-floppy-save" aria-hidden="true" title="Save as"></span>
+        </button>
+    </div>
+    
+    <div class="btn-group" role="group" aria-label="...">
+        <button id="btn-add" type="button" class="btn btn-default" aria-label="Left Align">
+            <span class="glyphicon glyphicon-plus" aria-hidden="true" title="Add child article"></span>
+        </button>
+
+        <button id="btn-del" type="button" class="btn btn-default">
+            <span class="glyphicon glyphicon-trash" aria-hidden="true" title="Delete selected article"></span>
+        </button>
+
+        <button id="btn-up" type="button" class="btn btn-default">
+            <span class="glyphicon glyphicon-arrow-up" aria-hidden="true" title="Article up"></span>
+        </button>
+
+        <button id="btn-down" type="button" class="btn btn-default">
+            <span class="glyphicon glyphicon-arrow-down" aria-hidden="true" title="Article down"></span>
+        </button>
+    </div>
+
+    <div id="files-box" style="display: none;">
+        <ul class="list-group row" id="files">
+            <li class="list-group-item col-xs-12">Row1</li>
+            <li class="list-group-item col-xs-12">Row2</li>
+            <li class="list-group-item col-xs-12">Row3</li>
+            <li class="list-group-item col-xs-12">Row4</li>
+            <li class="list-group-item col-xs-12">Row5</li>
+            <li class="list-group-item col-xs-12">Row6Row6Row6Row6Row6Row6 Row6Row6Row6Row6Row6</li>
+            <li class="list-group-item col-xs-12">Row7</li>
+            <li class="list-group-item col-xs-12">Row8</li>
+            <li class="list-group-item col-xs-12">Row9</li>
+            <li class="list-group-item col-xs-12">Row10</li>
+            <li class="list-group-item col-xs-12">Row9</li>
+            <li class="list-group-item col-xs-12">Row10</li>
+        </ul>
+    </div>
+        
+    <div id="work-box">
+       <div class="row work-row">
+           <div class="col-xs-4" style="background-color: #000; color: #fff;">
+               menu
+           </div>
+           <div class="col-xs-8">
+               text
+           </div>
+       </div>
+        
+            
+        <!--<table class="work-tab">
+            <tr style="height: 1px;">
+            <td style="background-color: #000;color:#fff;">
+                left box
+            </td>
+            <td>
+                right box
+            </td>
+            </tr>
+        </table>-->
+     </div>
+  </body>
+</html>

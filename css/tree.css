@@ -1,0 +1,68 @@
+﻿.tree {
+    min-height: 20px;
+    min-width: 300px;
+    padding: 19px;
+    margin-bottom: 20px;
+    font-family: Arial, Tahoma, Consolas;
+}
+    .tree ul {
+        margin-left: -24px;
+    }
+
+    .tree li {
+        list-style-type: none;
+        margin: 0;
+        padding: 4px 4px 0 4px;
+        position: relative;
+    }
+
+        .tree li.expanded ul {
+            display: block;
+        } 
+
+        .tree li.collapsed ul {
+            display: none;
+        } 
+
+        .tree li span {
+            -moz-border-radius: 2px;
+            -webkit-border-radius: 2px;
+            border-radius: 2px;
+            border-style: none;
+            display: inline-block;
+            padding: 3px 8px;
+            text-decoration: none;
+        }
+
+        .tree li > span {
+            cursor: pointer;
+        }
+
+        .tree li > span > div {
+            display: inline-block;
+        }
+
+    .tree > ul > li::before, .tree > ul > li::after {
+        border: 0;
+    }
+
+    .tree li > span:hover {
+        background: #999;
+        border-style: none;
+        color: #000;
+    }
+
+    .tree li > span.selected {
+        /*background: #ffebbf;
+        border: 1px solid #ffc773;*/
+        background-color: #fff;
+        color: #000;
+        border-style: none;
+    }
+
+    .tree li span.lab {
+        padding-left: 8px;
+        border-style: none;
+    }
+
+    .tree li i.glyphicon {margin-right: 8px;}
