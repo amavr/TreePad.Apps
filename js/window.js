@@ -1,43 +1,53 @@
-function Page(){
-  
-  var me = this;
-  
-  var $files, $work;
-  var $btn_open;
-  
-  this.showFiles = function(e){
-      e.preventDefault();
+function Page() {
 
-      console.log('click open');
+    var me = this;
 
-      $btn_open.data('files', !$files.is(':visible'));
-      
-      $files.fadeToggle(400);
-      $work.fadeToggle(400);
+    var $files, $work;
+    var $btn_open;
 
-      $('span', $btn_open).toggleClass('glyphicon-folder-open');
-      $('span', $btn_open).toggleClass('glyphicon-remove-circle');
-      
-  }
-  
-  var constructor = function(){
-    $files = $('#files-box');
-    $work = $('#work-box');
-    
-    $btn_open = $('#btn-open');
-    
-    $btn_open.data('files', false);
+    var gdocs;
 
-    $btn_open.on('click', me.showFiles);
-  }
-  
-  constructor();
+    this.showFiles = function (e) {
+        e.preventDefault();
+
+        me.auth();
+
+        $btn_open.data('files', !$files.is(':visible'));
+        $files.fadeToggle(400);
+        $work.fadeToggle(400);
+        $('span', $btn_open).toggleClass('glyphicon-folder-open');
+        $('span', $btn_open).toggleClass('glyphicon-remove-circle');
+
+    }
+
+    this.auth = function () {
+        console.log('auth start');
+        gdocs.auth2(function (token) {
+            console.log('auth ok: '+ token);
+            gdocs.getRootFolder(function(folder_id){
+                console.log('root folder id: '+ folder_id);
+            });
+        });
+    }
+
+    var constructor = function () {
+
+        gdocs = new GDocs();
+
+        $files = $('#files-box');
+        $work = $('#work-box');
+        $btn_open = $('#btn-open');
+        $btn_open.data('files', false);
+        $btn_open.on('click', me.showFiles);
+    }
+
+    constructor();
 }
 
 
-$(function(){
-  console.log('page loaded');
+$(function () {
+    console.log('page loaded');
 
-  var page = new Page();
+    var page = new Page();
 });
 
