@@ -24,8 +24,11 @@ function Page() {
         console.log('auth start');
         gdocs.auth2(function (token) {
             console.log('auth ok: '+ token);
-            gdocs.getRootFolder(function(folder_id){
-                console.log('root folder id: '+ folder_id);
+            gdocs.getRootFolder(function(root_id){
+                console.log('root folder id: '+ root_id);
+                gdocs.getHomeFolder(root_id, function(folder_id){
+                    console.log('home folder id: '+ folder_id);
+                });
             });
         });
     }

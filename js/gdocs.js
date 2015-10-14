@@ -22,13 +22,21 @@ Author: Eric Bidelman (ericbidelman@chromium.org)
 function GDocs(selector) {
 
     var SCOPE_ = 'https://www.googleapis.com/drive/v2/';
-
+    var HOME_ = 'TreePad';
+    
     this.lastResponse = null;
 
     this.accessToken = null;
+    
+    this.folder_id = null;
+    
 
     this.__defineGetter__('SCOPE', function () {
         return SCOPE_;
+    });
+
+    this.__defineGetter__('HOME', function () {
+        return HOME_;
     });
 
     this.__defineGetter__('DOCLIST_FEED', function () {
@@ -42,6 +50,7 @@ function GDocs(selector) {
     this.__defineGetter__('DEFAULT_CHUNK_SIZE', function () {
         return 1024 * 1024 * 5; // 5MB;
     });
+    
 };
 
 GDocs.prototype.auth = function (interactive, opt_callback) {
@@ -113,6 +122,7 @@ GDocs.prototype.revokeAuthToken = function (opt_callback) {
  * Generic HTTP AJAX request handler.
  */
 GDocs.prototype.makeRequest = function (method, url, callback, opt_data, opt_headers) {
+
     var data = opt_data || null;
     var headers = opt_headers || {};
 
@@ -125,22 +135,53 @@ GDocs.prototype.makeRequest = function (method, url, callback, opt_data, opt_hea
         xhr.setRequestHeader(key, headers[key]);
     }
 
-    xhr.onload = function (e) {
-        this.lastResponse = this.response;
-        callback(this.lastResponse, this);
-    }.bind(this);
+    xhr.onreadystatechange = function () {
+        if (xhr.readyState == 4) {
+            if (xhr.status == 200) {
+                var answer = JSON.parse(xhr.responseText);
+                console.log(answer);
+                callback(answer);
+            }
+        }
+    };
+
     xhr.onerror = function (e) {
         console.log(this, this.status, this.response,
             this.getAllResponseHeaders());
     };
+    
     xhr.send(data);
 };
 
 // calback = function(string folder_id)
 GDocs.prototype.getRootFolder = function (callback) {
-    var request = gapi.client.drive.about.get();
-    request.execute(function (resp) {
-        callback(resp.rootFolderId);
+    this.makeRequest('GET', this.SCOPE + 'about', function (answer) {
+        callback(answer.rootFolderId);
+    });
+}
+
+// calback = function(string folder_id)
+GDocs.prototype.getHomeFolder = function (root_id, callback) {
+
+    var q = encodeURIComponent('mimeType contains "application/vnd.google-apps.folder" and title = "'+ this.HOME +'" and trashed = false and "'+ root_id +'" in parents');
+    var f = encodeURIComponent('items(id,originalFilename,mimeType,modifiedDate,kind,title)');
+
+    this.makeRequest('GET', this.SCOPE + 'files?q='+ q + '&fields='+ f, function (answer) {
+        if(answer.items.length == 0){
+            callback(null);
+        }
+        else{
+            callback(answer.items[0].id);
+        }
+    });
+}
+
+
+
+// calback = function(string folder_id)
+GDocs.prototype.getFiles = function (callback) {
+    this.makeRequest('GET', this.SCOPE + 'about', function (answer) {
+        callback(answer.rootFolderId);        
     });
 }
 
@@ -179,3 +220,14 @@ GDocs.prototype.upload = function (blob, callback, retry) {
 };
 
 
+var obj2str = function(obj){
+    if(obj){
+        var str = Object.keys(obj).map(function(key){ 
+            return encodeURIComponent(key) + '=' + encodeURIComponent(obj[key]); 
+        }).join('&');
+        return '?' + str;
+    }
+    else{
+        return '';
+    }
+}     
