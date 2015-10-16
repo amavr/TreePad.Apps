@@ -28,6 +28,11 @@ function Page() {
                 console.log('root folder id: '+ root_id);
                 gdocs.getHomeFolder(root_id, function(folder_id){
                     console.log('home folder id: '+ folder_id);
+                    if(folder_id === null){
+                        gdocs.createHomeFolder(root_id, function(folder_id){
+                            console.log('created home folder id: '+ folder_id);
+                        });
+                    }
                 });
             });
         });
