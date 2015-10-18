@@ -205,12 +205,21 @@ GDocs.prototype.createHomeFolder = function (root_id, callback) {
     headers);
 }
 
-// calback = function(string folder_id)
-GDocs.prototype.getFiles = function (callback) {
-    this.makeRequest('GET', this.SCOPE + 'about', function (answer) {
-        callback(answer.rootFolderId);
+GDocs.prototype.getFiles = function (root_id, callback) {
+
+    var q = encodeURIComponent('mimeType contains "application/json" and trashed = false and "' + root_id + '" in parents');
+    var f = encodeURIComponent('items(id,mimeType,fileExtension,downloadUrl,webViewLink,webContentLink,defaultOpenWithLink,selfLink,kind,fileSize,modifiedDate,title)');
+
+    this.makeRequest('GET', this.SCOPE + 'files?q=' + q + '&fields=' + f, function (answer) {
+        if (answer.items.length == 0) {
+            callback(null);
+        }
+        else {
+            callback(answer.items);
+        }
     });
 }
+
 
 /**
  * Uploads a file to Google Docs.
