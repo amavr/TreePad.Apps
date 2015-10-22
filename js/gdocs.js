@@ -217,52 +217,53 @@ GDocs.prototype.createHomeFolder = function (root_id, callback) {
 }
 
 // calback = function(string folder_id)
-GDocs.prototype.getFiles = function (folder_id, callback) {
-    this.makeRequest('GET', this.SCOPE + 'about', function (answer) {
-        callback(answer.rootFolderId);
-    });
-
-    var data = {
-        "title": this.HOME,
-        "parents":
-        [
-            {
-                "id": folder_id
-            }
-        ],
-        "mimeType": "application/vnd.google-apps.folder"
-    };
-    
-    var json = JSON.stringify(data);
-    
-    var headers = {
-        "Content-Type": "application/json"
-    };
-    
-    // var url = 'https://www.googleapis.com/drive/v2/files?uploadType=media HTTP/1.1';
-    // var url = this.SCOPE + 'files?uploadType=media HTTP/1.1';
-    // 
-    // this.makeRequest('POST', url, function (answer) {
-    //     callback(answer.id);
-    // }, 
-    // json,
-    // headers);
-}
-
-// GDocs.prototype.getFiles = function (root_id, callback) {
-// 
-//     var q = encodeURIComponent('mimeType contains "application/json" and trashed = false and "' + root_id + '" in parents');
-//     var f = encodeURIComponent('items(id,mimeType,fileExtension,downloadUrl,webViewLink,webContentLink,defaultOpenWithLink,selfLink,kind,fileSize,modifiedDate,title)');
-// 
-//     this.makeRequest('GET', this.SCOPE + 'files?q=' + q + '&fields=' + f, function (answer) {
-//         if (answer.items.length == 0) {
-//             callback(null);
-//         }
-//         else {
-//             callback(answer.items);
-//         }
+// GDocs.prototype.getFiles = function (folder_id, callback) {
+//     this.makeRequest('GET', this.SCOPE + 'about', function (answer) {
+//         callback(answer.rootFolderId);
 //     });
+// 
+//     var data = {
+//         "title": this.HOME,
+//         "parents":
+//         [
+//             {
+//                 "id": folder_id
+//             }
+//         ],
+//         "mimeType": "application/vnd.google-apps.folder"
+//     };
+//     
+//     var json = JSON.stringify(data);
+//     
+//     var headers = {
+//         "Content-Type": "application/json"
+//     };
+//     
+//     // var url = 'https://www.googleapis.com/drive/v2/files?uploadType=media HTTP/1.1';
+//     // var url = this.SCOPE + 'files?uploadType=media HTTP/1.1';
+//     // 
+//     // this.makeRequest('POST', url, function (answer) {
+//     //     callback(answer.id);
+//     // }, 
+//     // json,
+//     // headers);
 // }
+
+// calback = function(files)
+GDocs.prototype.getFiles = function (folder_id, callback) {
+
+    var q = encodeURIComponent('mimeType = "application/json" and trashed = false and "' + folder_id + '" in parents');
+    var f = encodeURIComponent('items(id,mimeType,fileExtension,downloadUrl,webViewLink,webContentLink,defaultOpenWithLink,selfLink,kind,fileSize,modifiedDate,title)');
+
+    this.makeRequest('GET', this.SCOPE + 'files?q=' + q + '&fields=' + f, function (answer) {
+        if (answer.items.length == 0) {
+            callback(null);
+        }
+        else {
+            callback(answer.items);
+        }
+    });
+}
 
 
 /**

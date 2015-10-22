@@ -29,7 +29,7 @@ function Page() {
                         console.log(files);
                         var html = '';
                         for (var i in files) {
-                            html += '<li id="file-' + files[i].id + '" class="list-group-item col-xs-12">' + files[i].title + '</li>';
+                            html += '<li id="file-' + files[i].id + '" class="list-group-item col-xs-12"><a href="#">' + files[i].title + '</a></li>';
                         }
                         $files.html(html);
                         me.showWait(false);
