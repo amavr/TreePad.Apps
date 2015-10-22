@@ -22,17 +22,27 @@ Author: Eric Bidelman (ericbidelman@chromium.org)
 function GDocs(selector) {
 
     var SCOPE_ = 'https://www.googleapis.com/drive/v2/';
-    var HOME_ = 'TreePad';
-    
+    var CONTENT_ = 'https://content.googleapis.com/drive/v2/';
+    var KEY_ = 'AIzaSyAAdwcBLfjclphcokapqnSEEp2PX6Y6la0';
+    var HOME_ = 'TreePad2';
+
     this.lastResponse = null;
 
     this.accessToken = null;
-    
+
     this.folder_id = null;
-    
+
 
     this.__defineGetter__('SCOPE', function () {
         return SCOPE_;
+    });
+
+    this.__defineGetter__('CONTENT', function () {
+        return CONTENT_;
+    });
+
+    this.__defineGetter__('KEY', function () {
+        return KEY_;
     });
 
     this.__defineGetter__('HOME', function () {
@@ -50,7 +60,7 @@ function GDocs(selector) {
     this.__defineGetter__('DEFAULT_CHUNK_SIZE', function () {
         return 1024 * 1024 * 5; // 5MB;
     });
-    
+
 };
 
 GDocs.prototype.auth = function (interactive, opt_callback) {
@@ -149,7 +159,7 @@ GDocs.prototype.makeRequest = function (method, url, callback, opt_data, opt_hea
         console.log(this, this.status, this.response,
             this.getAllResponseHeaders());
     };
-    
+
     xhr.send(data);
 };
 
@@ -162,26 +172,49 @@ GDocs.prototype.getRootFolder = function (callback) {
 
 // calback = function(string folder_id)
 GDocs.prototype.getHomeFolder = function (root_id, callback) {
-
-    var q = encodeURIComponent('mimeType contains "application/vnd.google-apps.folder" and title = "'+ this.HOME +'" and trashed = false and "'+ root_id +'" in parents');
+    var q = encodeURIComponent('mimeType contains "application/vnd.google-apps.folder" and title = "' + this.HOME + '" and trashed = false and "' + root_id + '" in parents');
     var f = encodeURIComponent('items(id,originalFilename,mimeType,modifiedDate,kind,title)');
 
-    this.makeRequest('GET', this.SCOPE + 'files?q='+ q + '&fields='+ f, function (answer) {
-        if(answer.items.length == 0){
+    this.makeRequest('GET', this.SCOPE + 'files?q=' + q + '&fields=' + f, function (answer) {
+        if (answer.items.length == 0) {
             callback(null);
         }
-        else{
+        else {
             callback(answer.items[0].id);
         }
     });
 }
 
+GDocs.prototype.createHomeFolder = function (root_id, callback) {
 
+    var data =
+        {
+            "title": this.HOME,
+            "parents":
+            [
+                {
+                    "id": root_id
+                }
+            ],
+            "mimeType": "application/vnd.google-apps.folder"
+        };
+
+    this.makeRequest('POST', this.CONTENT + 'files', function (answer) {
+        //this.makeRequest('POST', this.CONTENT + 'files?key=' + this.KEY + '&alt=json', function (answer) {
+        if (answer.items.length == 0) {
+            callback(null);
+        }
+        else {
+            callback(answer.items[0].id);
+        }
+    },
+    JSON.stringify(data));
+}
 
 // calback = function(string folder_id)
 GDocs.prototype.getFiles = function (callback) {
     this.makeRequest('GET', this.SCOPE + 'about', function (answer) {
-        callback(answer.rootFolderId);        
+        callback(answer.rootFolderId);
     });
 }
 
@@ -220,14 +253,15 @@ GDocs.prototype.upload = function (blob, callback, retry) {
 };
 
 
-var obj2str = function(obj){
-    if(obj){
-        var str = Object.keys(obj).map(function(key){ 
-            return encodeURIComponent(key) + '=' + encodeURIComponent(obj[key]); 
+var obj2str = function (obj) {
+    if (obj) {
+        var str = Object.keys(obj).map(function (key) {
+            return encodeURIComponent(key) + '=' + encodeURIComponent(obj[key]);
         }).join('&');
         return '?' + str;
     }
-    else{
+    else {
         return '';
     }
-}     
+}
+     
