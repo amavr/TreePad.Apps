@@ -26,6 +26,7 @@ function Page() {
             me.auth(function (token) {
                 me.getHomeFolder(token, function (folder_id) {
                     me.getFiles(folder_id, function (files) {
+                        console.log(files);
                         var html = '';
                         for (var i in files) {
                             html += '<li id="file-' + files[i].id + '" class="list-group-item col-xs-12">' + files[i].title + '</li>';
@@ -50,19 +51,7 @@ function Page() {
         console.log('auth start');
         gdocs.auth2(function (token) {
             console.log('auth ok: ' + token);
-            gdocs.getRootFolder(function (root_id) {
-                console.log('root folder id: ' + root_id);
-                gdocs.getHomeFolder(root_id, function (folder_id) {
-                    console.log('home folder id: ' + folder_id);
-                    if (folder_id == null) {
-                        gdocs.createHomeFolder(root_id, function (folder_id) {
-                            console.log('callback createHomeFolder');
-                        });
-                    }
-                });
-                console.log('auth ok: ' + token);
-                if (callback) callback(token);
-            });
+            if (callback) callback(token);
         });
     }
     
@@ -72,10 +61,28 @@ function Page() {
             console.log('root folder id: ' + root_id);
             gdocs.getHomeFolder(root_id, function (folder_id) {
                 console.log('home folder id: ' + folder_id);
-                callback(folder_id);
+                if (folder_id == null) {
+                    gdocs.createHomeFolder(root_id, function (folder_id) {
+                        console.log('callback createHomeFolder');
+                        callback(folder_id);
+                    });
+                }
+                else {
+                    callback(folder_id);
+                }
             });
         });
     }
+
+
+    // gdocs.getRootFolder(function (root_id) {
+    //     console.log('root folder id: ' + root_id);
+    //     gdocs.getHomeFolder(root_id, function (folder_id) {
+    //         console.log('home folder id: ' + folder_id);
+    //     });
+    //     console.log('auth ok: ' + token);
+    // });
+
 
     // callback = function(files)
     this.getFiles = function (folder_id, callback) {

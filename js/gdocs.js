@@ -24,7 +24,7 @@ function GDocs(selector) {
     var SCOPE_ = 'https://www.googleapis.com/drive/v2/';
     var CONTENT_ = 'https://content.googleapis.com/drive/v2/';
     var KEY_ = 'AIzaSyAAdwcBLfjclphcokapqnSEEp2PX6Y6la0';
-    var HOME_ = 'TreePad2';
+    var HOME_ = 'TreePad';
 
     this.lastResponse = null;
 
@@ -217,7 +217,7 @@ GDocs.prototype.createHomeFolder = function (root_id, callback) {
 }
 
 // calback = function(string folder_id)
-GDocs.prototype.getFiles = function (callback) {
+GDocs.prototype.getFiles = function (folder_id, callback) {
     this.makeRequest('GET', this.SCOPE + 'about', function (answer) {
         callback(answer.rootFolderId);
     });
@@ -227,7 +227,7 @@ GDocs.prototype.getFiles = function (callback) {
         "parents":
         [
             {
-                "id": root_id
+                "id": folder_id
             }
         ],
         "mimeType": "application/vnd.google-apps.folder"
@@ -240,13 +240,13 @@ GDocs.prototype.getFiles = function (callback) {
     };
     
     // var url = 'https://www.googleapis.com/drive/v2/files?uploadType=media HTTP/1.1';
-    var url = this.SCOPE + 'files?uploadType=media HTTP/1.1';
-    
-    this.makeRequest('POST', url, function (answer) {
-        callback(answer.id);
-    }, 
-    json,
-    headers);
+    // var url = this.SCOPE + 'files?uploadType=media HTTP/1.1';
+    // 
+    // this.makeRequest('POST', url, function (answer) {
+    //     callback(answer.id);
+    // }, 
+    // json,
+    // headers);
 }
 
 // GDocs.prototype.getFiles = function (root_id, callback) {
