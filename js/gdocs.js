@@ -142,6 +142,7 @@ GDocs.prototype.makeRequest = function (method, url, callback, opt_data, opt_hea
     // Include common headers (auth and version) and add rest. 
     xhr.setRequestHeader('Authorization', 'Bearer ' + this.accessToken);
     for (var key in headers) {
+        console.log('['+ key +']=['+ headers[key] +']');
         xhr.setRequestHeader(key, headers[key]);
     }
 
@@ -187,28 +188,32 @@ GDocs.prototype.getHomeFolder = function (root_id, callback) {
 
 GDocs.prototype.createHomeFolder = function (root_id, callback) {
 
-    var data =
-        {
-            "title": this.HOME,
-            "parents":
-            [
-                {
-                    "id": root_id
-                }
-            ],
-            "mimeType": "application/vnd.google-apps.folder"
-        };
-
-    this.makeRequest('POST', this.CONTENT + 'files', function (answer) {
-        //this.makeRequest('POST', this.CONTENT + 'files?key=' + this.KEY + '&alt=json', function (answer) {
-        if (answer.items.length == 0) {
-            callback(null);
-        }
-        else {
-            callback(answer.items[0].id);
-        }
-    },
-    JSON.stringify(data));
+    var data = {
+        "title": this.HOME,
+        "parents":
+        [
+            {
+                "id": root_id
+            }
+        ],
+        "mimeType": "application/vnd.google-apps.folder"
+    };
+    
+    var json = JSON.stringify(data);
+    
+    var headers = {
+        "Content-Type": "application/json"
+    };
+    
+    // var url = 'https://www.googleapis.com/drive/v2/files?uploadType=media HTTP/1.1';
+    var url = this.SCOPE + 'files?uploadType=media HTTP/1.1';
+    
+    this.makeRequest('POST', url, function (answer) {
+        callback(answer.id);
+    }, 
+    json,
+    headers);    
+    
 }
 
 // calback = function(string folder_id)
@@ -216,7 +221,49 @@ GDocs.prototype.getFiles = function (callback) {
     this.makeRequest('GET', this.SCOPE + 'about', function (answer) {
         callback(answer.rootFolderId);
     });
+
+    var data = {
+        "title": this.HOME,
+        "parents":
+        [
+            {
+                "id": root_id
+            }
+        ],
+        "mimeType": "application/vnd.google-apps.folder"
+    };
+    
+    var json = JSON.stringify(data);
+    
+    var headers = {
+        "Content-Type": "application/json"
+    };
+    
+    // var url = 'https://www.googleapis.com/drive/v2/files?uploadType=media HTTP/1.1';
+    var url = this.SCOPE + 'files?uploadType=media HTTP/1.1';
+    
+    this.makeRequest('POST', url, function (answer) {
+        callback(answer.id);
+    }, 
+    json,
+    headers);
 }
+
+// GDocs.prototype.getFiles = function (root_id, callback) {
+// 
+//     var q = encodeURIComponent('mimeType contains "application/json" and trashed = false and "' + root_id + '" in parents');
+//     var f = encodeURIComponent('items(id,mimeType,fileExtension,downloadUrl,webViewLink,webContentLink,defaultOpenWithLink,selfLink,kind,fileSize,modifiedDate,title)');
+// 
+//     this.makeRequest('GET', this.SCOPE + 'files?q=' + q + '&fields=' + f, function (answer) {
+//         if (answer.items.length == 0) {
+//             callback(null);
+//         }
+//         else {
+//             callback(answer.items);
+//         }
+//     });
+// }
+
 
 /**
  * Uploads a file to Google Docs.
@@ -228,6 +275,7 @@ GDocs.prototype.upload = function (blob, callback, retry) {
         var entry = JSON.parse(response).entry;
         callback.apply(this, [entry]);
     }.bind(this);
+    
     var onError = function (response) {
         if (retry) {
             this.removeCachedAuthToken(
@@ -239,7 +287,6 @@ GDocs.prototype.upload = function (blob, callback, retry) {
         }
     }.bind(this);
 
-
     var uploader = new MediaUploader({
         token: this.accessToken,
         file: blob,
@@ -250,7 +297,7 @@ GDocs.prototype.upload = function (blob, callback, retry) {
     document.getElementById('main').classList.add('uploading');
     uploader.upload();
 
-};
+}
 
 
 var obj2str = function (obj) {
