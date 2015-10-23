@@ -64,42 +64,26 @@ function GDocs(selector) {
     });
 
 
-    this.auth = function (interactive, opt_callback) {
-        try {
-            chrome.identity.getAuthToken({ interactive: interactive }, function (token) {
-                if (token) {
-                    me.accessToken = token;
-                    opt_callback && opt_callback();
+    var auth2 = function (interactive, callback) {
+        chrome.identity.getAuthToken({ 'interactive': interactive }, function (token) {
+            if (token) {
+                me.accessToken = token;
+                callback && callback();
+            }
+            else{
+                if(!interactive){ 
+                    auth2(true, callback);
                 }
-            }.bind(me));
-        } catch (e) {
-            console.log(e);
-        }
+            }
+        });
     }
 
-    this.auth2 = function (opt_callback) {
+    this.auth = function (callback) {
         try {
-            chrome.identity.getAuthToken({ interactive: false }, function (token) {
-                if (token) {
-                    me.accessToken = token;
-                    opt_callback && opt_callback(token);
-                }
-                else {
-                    me.accessToken = null;
-
-                    chrome.identity.getAuthToken({ interactive: true }, function (token) {
-                        if (token) {
-                            opt_callback && opt_callback(token);
-                        }
-                        else {
-                            opt_callback && opt_callback(null);
-                        }
-                    });
-                }
-            }.bind(me));
-        }
-        catch (e) {
+            auth2(false, callback);
+        } catch (e) {
             console.log(e);
+            auth2(true, callback);
         }
     }
 

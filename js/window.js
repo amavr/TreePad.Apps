@@ -23,8 +23,8 @@ function Page() {
         var files_visible = $files.is(':visible');
         if (!files_visible) {
             me.showWait(true);
-            me.auth(function (token) {
-                me.getHomeFolder(token, function (folder_id) {
+            gdocs.auth(function () {
+                me.getHomeFolder(function (folder_id) {
                     me.getFiles(folder_id, function (files) {
                         console.log(files);
                         var html = '';
@@ -44,17 +44,8 @@ function Page() {
         toggleFiles();
     };
 
-    // callback = function(token)
-    this.auth = function (callback) {
-        console.log('auth start');
-        gdocs.auth2(function (token) {
-            console.log('auth ok: ' + token);
-            if (callback) callback(token);
-        });
-    }
-    
     // callback = function(folder_id)
-    this.getHomeFolder = function (token, callback) {
+    this.getHomeFolder = function (callback) {
         gdocs.getRootFolder(function (root_id) {
             console.log('root folder id: ' + root_id);
             gdocs.getHomeFolder(root_id, function (folder_id) {
