@@ -82,7 +82,6 @@ function Page() {
     }
 
     var showFiles = function(){
-        // $btn_open.data('files', files_visible);
         $files.fadeIn(400);
         $work.fadeOut();
         $('span', $btn_open).removeClass('glyphicon-folder-open');

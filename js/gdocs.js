@@ -188,32 +188,19 @@ GDocs.prototype.getHomeFolder = function (root_id, callback) {
 
 GDocs.prototype.createHomeFolder = function (root_id, callback) {
 
-    var data = {
-        "title": this.HOME,
-        "parents":
-        [
-            {
-                "id": root_id
-            }
-        ],
-        "mimeType": "application/vnd.google-apps.folder"
-    };
-    
+    var data = {"title": this.HOME, "parents":[{"id": root_id}], "mimeType": "application/vnd.google-apps.folder"};
     var json = JSON.stringify(data);
-    
-    var headers = {
-        "Content-Type": "application/json"
-    };
-    
-    // var url = 'https://www.googleapis.com/drive/v2/files?uploadType=media HTTP/1.1';
-    var url = this.SCOPE + 'files?uploadType=media HTTP/1.1';
-    
-    this.makeRequest('POST', url, function (answer) {
-        callback(answer.id);
-    }, 
-    json,
-    headers);    
-    
+    var headers = {"Content-Type": "application/json"};
+   
+    this.makeRequest(
+        'POST', 
+        this.SCOPE + 'files?uploadType=media HTTP/1.1', 
+        function (answer) {
+            callback(answer.id);
+        }, 
+        json,
+        headers
+    );    
 }
 
 // calback = function(files)
