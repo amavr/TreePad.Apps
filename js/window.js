@@ -28,22 +28,20 @@ function Page() {
                     me.getFiles(folder_id, function (files) {
                         console.log(files);
                         var html = '';
+                        
                         for (var i in files) {
-                            html += '<li id="file-' + files[i].id + '" class="list-group-item col-xs-12"><a href="#">' + files[i].title + '</a></li>';
+                            var id = files[i].id;
+                            html += '<li class="list-group-item col-xs-12"><a id="' + id + '" href="#">' + files[i].title + '</a></li>';
                         }
                         $files.html(html);
+                        
                         me.showWait(false);
                     });
                 });
             });
         }
 
-        $btn_open.data('files', files_visible);
-        $files.fadeToggle(400);
-        $work.fadeToggle(400);
-        $('span', $btn_open).toggleClass('glyphicon-folder-open');
-        $('span', $btn_open).toggleClass('glyphicon-remove-circle');
-
+        toggleFiles();
     };
 
     // callback = function(token)
@@ -74,26 +72,39 @@ function Page() {
         });
     }
 
-
-    // gdocs.getRootFolder(function (root_id) {
-    //     console.log('root folder id: ' + root_id);
-    //     gdocs.getHomeFolder(root_id, function (folder_id) {
-    //         console.log('home folder id: ' + folder_id);
-    //     });
-    //     console.log('auth ok: ' + token);
-    // });
-
-
     // callback = function(files)
     this.getFiles = function (folder_id, callback) {
         if (folder_id !== null) {
             gdocs.getFiles(folder_id, function (files) {
-                console.log(files);
                 callback(files);
             });
         }
     }
 
+    var showFiles = function(){
+        // $btn_open.data('files', files_visible);
+        $files.fadeIn(400);
+        $work.fadeOut();
+        $('span', $btn_open).removeClass('glyphicon-folder-open');
+        $('span', $btn_open).addClass('glyphicon-remove-circle');
+    }
+    
+    var hideFiles = function(){
+        $work.fadeIn(400);
+        $files.fadeOut();
+        $('span', $btn_open).addClass('glyphicon-folder-open');
+        $('span', $btn_open).removeClass('glyphicon-remove-circle');
+    }
+    
+    var toggleFiles = function(){
+        var files_visible = $files.is(':visible');
+        if(files_visible){
+            hideFiles();
+        }
+        else{
+            showFiles();
+        }
+    }
 
     var constructor = function () {
 
@@ -105,6 +116,12 @@ function Page() {
         $btn_open = $('#btn-open');
         $btn_open.data('files', false);
         $btn_open.on('click', me.showFiles);
+        
+        $files.on('click', function(e){
+            console.log(e.target.id);
+            toggleFiles();
+            e.preventDefault();
+        });
     }
 
     constructor();
