@@ -28,13 +28,13 @@ function Page() {
                     me.getFiles(folder_id, function (files) {
                         console.log(files);
                         var html = '';
-                        
+
                         for (var i in files) {
                             var id = files[i].id;
                             html += '<li class="list-group-item col-xs-12"><a id="' + id + '" href="#">' + files[i].title + '</a></li>';
                         }
                         $files.html(html);
-                        
+
                         me.showWait(false);
                     });
                 });
@@ -81,31 +81,73 @@ function Page() {
         }
     }
 
-    var showFiles = function(){
+    var showFiles = function () {
         // $btn_open.data('files', files_visible);
         $files.fadeIn(400);
         $work.fadeOut();
         $('span', $btn_open).removeClass('glyphicon-folder-open');
         $('span', $btn_open).addClass('glyphicon-remove-circle');
     }
-    
-    var hideFiles = function(){
+
+    var hideFiles = function () {
         $work.fadeIn(400);
         $files.fadeOut();
         $('span', $btn_open).addClass('glyphicon-folder-open');
         $('span', $btn_open).removeClass('glyphicon-remove-circle');
     }
-    
-    var toggleFiles = function(){
+
+    var toggleFiles = function () {
         var files_visible = $files.is(':visible');
-        if(files_visible){
+        if (files_visible) {
             hideFiles();
         }
-        else{
+        else {
             showFiles();
         }
     }
 
+    var onLoadFile = function (data) {
+        tree = new Tree('#tree-box', '#text-box', data);
+        // initHandlers();
+    }
+
+    var initHandlers = function () {
+
+        $('#btn-debug').bind('click', function () {
+            var data = tree.getData();
+            console.log(data);
+        });
+
+        $('#btn-save').bind('click', function () {
+            var data = tree.getData();
+            me.save(data, function (file) {
+                console.log(file);
+            });
+        });
+
+        $('#btn-saveas').bind('click', function () {
+            me.saveas();
+        });
+
+
+        $('#btn-up').bind('click', function () {
+            tree.up();
+        });
+
+        $('#btn-down').bind('click', function () {
+            tree.down();
+        });
+
+        $('#btn-add').bind('click', function () {
+            tree.add({ title: 'new node', text: '' });
+        });
+
+        $('#btn-del').bind('click', function () {
+            tree.delete();
+        });
+            
+    };
+    
     var constructor = function () {
 
         gdocs = new GDocs();
@@ -116,11 +158,18 @@ function Page() {
         $btn_open = $('#btn-open');
         $btn_open.data('files', false);
         $btn_open.on('click', me.showFiles);
-        
-        $files.on('click', function(e){
-            console.log(e.target.id);
-            toggleFiles();
+
+        $files.on('click', function (e) {
             e.preventDefault();
+            console.log(e.target);
+            var file_id = e.target.id;
+            me.showWait(true);
+            gdocs.loadFile(file_id, function (answer) {
+                onLoadFile(answer);
+
+                toggleFiles();
+                me.showWait(false);
+            });
         });
     }
 
