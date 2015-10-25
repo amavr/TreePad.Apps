@@ -99,7 +99,7 @@ function Page() {
 
     var onLoadFile = function (data) {
         tree = new Tree('#tree-box', '#text-box', data);
-        // initHandlers();
+        initHandlers();
     }
 
     var initHandlers = function () {

@@ -1,26 +1,25 @@
 {
-    "name": "TreePad",
-    "description": "Simple hierarchical text editor with GDrive syncronization",
-    "version": "0.1",
-    "manifest_version": 2,
-    "app": {
-        "background": {
-            "scripts": [
-                "background.js"
-            ]
-        }
-    },
-    "icons": {
-        "16": "img/calculator-16.png",
-        "128": "img/calculator-128.png"
-    },
-    "permissions": [
-        "identity"
-    ],
-    "oauth2": {
-        "client_id": "458531844515-37v9rk477vnjulcd8kadolandtn1mspl.apps.googleusercontent.com",
-        "scopes": [
-            "https://www.googleapis.com/auth/drive"
-        ]
-    }
+	"name" : "TreePad",
+	"description" : "Simple hierarchical text editor with GDrive syncronization",
+	"version" : "0.1",
+	"manifest_version" : 2,
+	"app" : {
+		"background" : {
+			"scripts" : ["background.js"
+			]
+		}
+	},
+	"icons" : {
+		"16" : "img/calculator-16.png",
+		"128" : "img/calculator-128.png"
+	},
+	"permissions" : [
+		"identity"
+	],
+	"oauth2" : {
+        "client_id": "458531844515-2gr31er8ba4iqbbtfjg3rhbr13t4eud1.apps.googleusercontent.com",
+		"scopes" : [
+			"https://www.googleapis.com/auth/drive"
+		]
+	}
 }

@@ -31,3 +31,14 @@ body {
 #tree-box {
     overflow: auto;
 }
+
+#text-box {
+	margin: 0px;
+	font-family: Consolas, Verdana, Arial;
+	font-size: 11pt;
+	border-style: none;
+	background-color: #fff;
+	color: #000;
+	white-space: pre-wrap;
+    overflow: auto;
+}

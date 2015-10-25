@@ -18,21 +18,23 @@
         console.log(a);
     }
 
-    var putText = function () {
+    var tbox2node = function () {
         if (selected) {
-            selected.text = $text_box.innerText;
+            // selected.text = $text_box[0].innerText;
+            selected.text = $text_box.text();
         }
     }
 
-    var getText = function () {
+    var node2tbox = function () {
         var text = (selected) ? selected.text : '';
         $text_box.text(text);
     }
 
     var onSelect = function (node) {
-        putText();
+        // console.log(node);
+        tbox2node();
         selected = node;
-        getText();
+        node2tbox();
     }
 
     var initHandlers = function () {
@@ -102,7 +104,7 @@
 
     this.getData = function () {
         // сначала в узел заносится текст из редактора 
-        putText();
+        tbox2node();
         var $list = $ul.find('> li');
         var count = $list.length;
         var data = [];
@@ -114,10 +116,14 @@
     }
 
     var constructor = function () {
+        
+        $text_box.text('');
+        
+        console.log($tree_box);
+        
         $ul = $('<ul></ul>');
         $tree_box.html('');
         $tree_box.append($ul);
-
 
         $tree_box.bind('click', function (e) {
             e.stopPropagation();
@@ -125,12 +131,7 @@
             onSelect();
         });
        
-
         if(!$tree_box.hasClass('tree')) $tree_box.addClass('tree');
-
-        //$tree_box.delegate('i', 'click', function (e) {
-        //    // switchState(e);
-        //});
 
         if (data != undefined && data.length > 0) {
             for (var i = 0; i < data.length; i++) {

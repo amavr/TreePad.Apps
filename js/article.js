@@ -119,6 +119,7 @@ function Article($parentUl, data, visible, onSelect) {
 
         $span.bind('click', function (e) {
             e.stopPropagation();
+            console.log(e);
             me.select();
         });
 
