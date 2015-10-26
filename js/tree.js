@@ -20,8 +20,9 @@
 
     var tbox2node = function () {
         if (selected) {
-            // selected.text = $text_box[0].innerText;
-            selected.text = $text_box.text();
+            selected.text = $text_box[0].innerText;
+            // эта конструкция не сохраняет переводы строк
+            // selected.text = $text_box.text();
         }
     }
 
@@ -31,7 +32,6 @@
     }
 
     var onSelect = function (node) {
-        // console.log(node);
         tbox2node();
         selected = node;
         node2tbox();
@@ -128,7 +128,7 @@
         $tree_box.bind('click', function (e) {
             e.stopPropagation();
             $("li > span.selected", $tree_box).removeClass("selected");
-            onSelect();
+            onSelect(null);
         });
        
         if(!$tree_box.hasClass('tree')) $tree_box.addClass('tree');

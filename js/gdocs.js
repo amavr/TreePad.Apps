@@ -31,9 +31,8 @@ function GDocs(selector) {
     this.lastResponse = null;
 
     this.accessToken = null;
-
-    this.folder_id = null;
-
+    
+    this.home_folder_id = null;
 
     this.__defineGetter__('SCOPE', function () {
         return SCOPE_;
@@ -64,14 +63,19 @@ function GDocs(selector) {
     });
 
 
+    
+    var pack_error = function(err_message){
+        return [{"title":"Error", "text": err_message, "children":[]}];        
+    }
+    
     var auth2 = function (interactive, callback) {
         chrome.identity.getAuthToken({ 'interactive': interactive }, function (token) {
             if (token) {
                 me.accessToken = token;
                 callback && callback();
             }
-            else{
-                if(!interactive){ 
+            else {
+                if (!interactive) {
                     auth2(true, callback);
                 }
             }
@@ -134,9 +138,17 @@ function GDocs(selector) {
         xhr.onreadystatechange = function () {
             if (xhr.readyState == 4) {
                 if (xhr.status == 200) {
-                    var answer = JSON.parse(xhr.responseText);
-                    console.log(answer);
-                    callback(answer);
+                    try
+                    {
+                        var answer = JSON.parse(xhr.responseText);
+                        console.log(answer);
+                        callback(answer);
+                    }
+                    catch(ex)
+                    {
+                        console.log(ex.message);
+                        callback(pack_error(ex.message));
+                    }
                 }
             }
         };
@@ -148,6 +160,7 @@ function GDocs(selector) {
 
         xhr.send(data);
     };
+
 
     // calback = function(string folder_id)
     this.getRootFolder = function (callback) {
@@ -164,13 +177,16 @@ function GDocs(selector) {
         me.makeRequest('GET', me.SCOPE + 'files?q=' + q + '&fields=' + f, function (answer) {
             if (answer.items.length == 0) {
                 callback(null);
+                me.home_folder_id = null;
             }
             else {
-                callback(answer.items[0].id);
+                me.home_folder_id = answer.items[0].id; 
+                callback(me.home_folder_id);
             }
         });
     }
 
+    // callback = function(folder_id)
     this.createHomeFolder = function (root_id, callback) {
 
         var data = {
@@ -193,9 +209,12 @@ function GDocs(selector) {
         // var url = 'https://www.googleapis.com/drive/v2/files?uploadType=media HTTP/1.1';
         var url = me.SCOPE + 'files?uploadType=media HTTP/1.1';
 
-        me.makeRequest('POST', url, function (answer) {
-            callback(answer.id);
-        },
+        me.makeRequest('POST', 
+            url, 
+            function (answer) {
+                me.home_folder_id = answer.id;
+                callback(answer.id);
+            },
             json,
             headers);
 
@@ -217,7 +236,7 @@ function GDocs(selector) {
         });
     }
 
-    // callback = function(fileData)
+    // callback = function(title, fileData)
     this.loadFile = function (file_id, callback) {
 
         var f = encodeURIComponent('downloadUrl,title');
@@ -225,51 +244,66 @@ function GDocs(selector) {
         me.makeRequest('GET', me.SCOPE + 'files/' + file_id + '?fields=' + f, function (answer) {
 
             if (answer) {
+                var title = answer.title;
+                
                 me.makeRequest('GET', answer.downloadUrl, function (data) {
-                    callback(data);
+                    callback(title, data);
                 });
             }
             else {
-                callback(null);
+                callback(null, null);
             }
 
         });
     }
 
-    /**
-     * Uploads a file to Google Docs.
-     */
-    this.upload = function (blob, callback, retry) {
+    this.uploadFile = function (fileData, title, id, callback) {
 
-        var onComplete = function (response) {
-            document.getElementById('main').classList.remove('uploading');
-            var entry = JSON.parse(response).entry;
-            callback.apply(me, [entry]);
-        }.bind(me);
+        var boundary = '-------314159265358979323846';
+        var delimiter = "\r\n--" + boundary + "\r\n";
+        var close_delim = "\r\n--" + boundary + "--";
 
-        var onError = function (response) {
-            if (retry) {
-                me.removeCachedAuthToken(
-                    me.auth.bind(me, true,
-                        me.upload.bind(me, blob, callback, false)));
-            } else {
-                document.getElementById('main').classList.remove('uploading');
-                throw new Error('Error: ' + response);
-            }
-        }.bind(me);
+        var reader = new FileReader();
+        reader.readAsBinaryString(fileData);
+        reader.onload = function (e) {
+            var contentType = fileData.type || 'application/octet-stream';
+            var metadata = {
+                'title': title,
+                'mimeType': contentType,
+                'parents': [
+                    { 'id': me.home_folder_id }
+                ],
+            };
 
-        var uploader = new MediaUploader({
-            token: me.accessToken,
-            file: blob,
-            onComplete: onComplete,
-            onError: onError
-        });
+            var base64Data = btoa(reader.result);
+            var multipartRequestBody =
+                delimiter +
+                'Content-Type: application/json\r\n\r\n' +
+                JSON.stringify(metadata) +
+                delimiter +
+                'Content-Type: ' + contentType + '\r\n' +
+                'Content-Transfer-Encoding: base64\r\n' +
+                '\r\n' +
+                base64Data +
+                close_delim;
 
-        document.getElementById('main').classList.add('uploading');
-        uploader.upload();
+            var rest_id = (id === null) ? '' : '/' + id;
+            var method = (id === null) ? 'POST' : 'PUT';
 
-    }
+            me.makeRequest(
+                method,
+                'https://www.googleapis.com/upload/drive/v2/files' + rest_id + '?uploadType=multipart',
+                function(answer){
+                    callback && callback(answer);
+                },
+                multipartRequestBody,
+                { 'Content-Type': 'multipart/mixed; boundary="' + boundary + '"' }
+                );
+        };
+    };
 };
+
+
 
 
 

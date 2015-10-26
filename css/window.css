@@ -33,7 +33,7 @@ body {
 }
 
 #text-box {
-	margin: 0px;
+	margin: 0;
 	font-family: Consolas, Verdana, Arial;
 	font-size: 11pt;
 	border-style: none;
@@ -41,4 +41,5 @@ body {
 	color: #000;
 	white-space: pre-wrap;
     overflow: auto;
+	height: 100%;
 }

@@ -6,7 +6,74 @@ function Page() {
     var $btn_open;
     var $body;
 
-    var gdocs;
+    var gdocs = null;
+    var tree = null;
+    var current_file_id = null;
+    var file_title = null;
+
+
+    var showFiles = function () {
+        // $btn_open.data('files', files_visible);
+        $files.fadeIn(400);
+        $work.fadeOut();
+        $('span', $btn_open).removeClass('glyphicon-folder-open');
+        $('span', $btn_open).addClass('glyphicon-remove-circle');
+    }
+
+    var hideFiles = function () {
+        $work.fadeIn(400);
+        $files.fadeOut();
+        $('span', $btn_open).addClass('glyphicon-folder-open');
+        $('span', $btn_open).removeClass('glyphicon-remove-circle');
+    }
+
+    var toggleFiles = function () {
+        var files_visible = $files.is(':visible');
+        if (files_visible) {
+            hideFiles();
+        }
+        else {
+            showFiles();
+        }
+    }
+
+    var onLoadFile = function (data) {
+        tree = new Tree('#tree-box', '#text-box', data);
+    }
+
+    var initHandlers = function () {
+
+        $('#btn-debug').bind('click', function () {
+            var data = tree.getData();
+            console.log(data);
+        });
+
+        $('#btn-save').bind('click', function () {
+            me.save();
+        });
+
+        $('#dlg-btn-save').bind('click', function () {
+            me.saveas();
+        });
+
+
+        $('#btn-up').bind('click', function () {
+            tree.up();
+        });
+
+        $('#btn-down').bind('click', function () {
+            tree.down();
+        });
+
+        $('#btn-add').bind('click', function () {
+            tree.add({ title: 'new node', text: '' });
+        });
+
+        $('#btn-del').bind('click', function () {
+            tree.delete();
+        });
+
+    };
 
     this.showWait = function (bool) {
         if (bool) {
@@ -25,6 +92,7 @@ function Page() {
             me.showWait(true);
             gdocs.auth(function () {
                 me.getHomeFolder(function (folder_id) {
+                    home_folder_id = folder_id;
                     me.getFiles(folder_id, function (files) {
                         console.log(files);
                         var html = '';
@@ -72,73 +140,36 @@ function Page() {
         }
     }
 
-    var showFiles = function () {
-        // $btn_open.data('files', files_visible);
-        $files.fadeIn(400);
-        $work.fadeOut();
-        $('span', $btn_open).removeClass('glyphicon-folder-open');
-        $('span', $btn_open).addClass('glyphicon-remove-circle');
-    }
 
-    var hideFiles = function () {
-        $work.fadeIn(400);
-        $files.fadeOut();
-        $('span', $btn_open).addClass('glyphicon-folder-open');
-        $('span', $btn_open).removeClass('glyphicon-remove-circle');
-    }
-
-    var toggleFiles = function () {
-        var files_visible = $files.is(':visible');
-        if (files_visible) {
-            hideFiles();
-        }
-        else {
-            showFiles();
-        }
-    }
-
-    var onLoadFile = function (data) {
-        tree = new Tree('#tree-box', '#text-box', data);
-        initHandlers();
-    }
-
-    var initHandlers = function () {
-
-        $('#btn-debug').bind('click', function () {
+    this.save = function () {
+        me.showWait(true);
+        gdocs.auth(function () {
             var data = tree.getData();
-            console.log(data);
-        });
-
-        $('#btn-save').bind('click', function () {
-            var data = tree.getData();
-            me.save(data, function (file) {
-                console.log(file);
+            var text = JSON.stringify(data);
+            var blob = new Blob([text], { type: 'application/json' });
+            gdocs.uploadFile(blob, file_title, current_file_id, function(answer){
+                me.showWait(false);
+                console.log(answer);
             });
         });
-
-        $('#btn-saveas').bind('click', function () {
-            me.saveas();
-        });
-
-
-        $('#btn-up').bind('click', function () {
-            tree.up();
-        });
-
-        $('#btn-down').bind('click', function () {
-            tree.down();
-        });
-
-        $('#btn-add').bind('click', function () {
-            tree.add({ title: 'new node', text: '' });
-        });
-
-        $('#btn-del').bind('click', function () {
-            tree.delete();
-        });
-            
     };
-    
+
+    this.saveas = function () {
+        me.showWait(true);
+        gdocs.auth(function () {
+            var data = tree.getData();
+            var text = JSON.stringify(data);
+            var title = $('#file-name').val();
+            var blob = new Blob([text], { type: 'application/json' });
+            gdocs.uploadFile(blob, title, null, function(answer){
+                this.title = title;
+                document.title = title;
+                
+                me.showWait(false);
+            });
+        });
+    };
+
     var constructor = function () {
 
         gdocs = new GDocs();
@@ -150,13 +181,17 @@ function Page() {
         $btn_open.data('files', false);
         $btn_open.on('click', me.showFiles);
 
+        initHandlers();
+
         $files.on('click', function (e) {
             e.preventDefault();
             console.log(e.target);
-            var file_id = e.target.id;
+            file_id = e.target.id;
             me.showWait(true);
-            gdocs.loadFile(file_id, function (answer) {
-                onLoadFile(answer);
+            gdocs.loadFile(file_id, function (title, data) {
+                
+                file_title = title;
+                onLoadFile(data);
 
                 toggleFiles();
                 me.showWait(false);
