@@ -2,7 +2,7 @@ function Page() {
 
     var me = this;
 
-    var $files, $work;
+    var $files, $work, $text_box;
     var $btn_open;
     var $body;
 
@@ -38,7 +38,7 @@ function Page() {
     }
 
     var onLoadFile = function (data) {
-        tree = new Tree('#tree-box', '#text-box', data);
+        tree = new Tree('#tree-box', $text_box, data);
     }
 
     var initHandlers = function () {
@@ -72,6 +72,29 @@ function Page() {
         $('#btn-del').bind('click', function () {
             tree.delete();
         });
+
+        $text_box.keydown(function (e) {
+            e.preventDefault();
+
+            if (e.keyCode === 13) {
+                try {
+                    var range = window.getSelection().getRangeAt(0);
+                    var pos = range.endOffset;
+                    var len = $text_box.text().length;
+                    var crlf = (pos == len) ? '\r\n\r\n' : '\r\n';
+                    document.execCommand('insertHTML', false, crlf);
+                }
+                catch (ex) {
+                    console.log(ex.message);
+                    document.execCommand('insertHTML', false, '\r\n');
+                }
+            }
+        });
+
+        $text_box.on('paste', function (e) {
+            // handlePaste(this, e);
+        });
+
 
     };
 
@@ -147,7 +170,7 @@ function Page() {
             var data = tree.getData();
             var text = JSON.stringify(data);
             var blob = new Blob([text], { type: 'application/json' });
-            gdocs.uploadFile(blob, file_title, current_file_id, function(answer){
+            gdocs.uploadFile(blob, file_title, current_file_id, function (answer) {
                 me.showWait(false);
                 console.log(answer);
             });
@@ -161,10 +184,10 @@ function Page() {
             var text = JSON.stringify(data);
             var title = $('#file-name').val();
             var blob = new Blob([text], { type: 'application/json' });
-            gdocs.uploadFile(blob, title, null, function(answer){
+            gdocs.uploadFile(blob, title, null, function (answer) {
                 this.title = title;
                 document.title = title;
-                
+
                 me.showWait(false);
             });
         });
@@ -177,6 +200,7 @@ function Page() {
         $body = $("body");
         $files = $('#files-box');
         $work = $('#work-box');
+        $text_box = $('#text-box', $work);
         $btn_open = $('#btn-open');
         $btn_open.data('files', false);
         $btn_open.on('click', me.showFiles);
@@ -189,7 +213,7 @@ function Page() {
             file_id = e.target.id;
             me.showWait(true);
             gdocs.loadFile(file_id, function (title, data) {
-                
+
                 file_title = title;
                 onLoadFile(data);
 
@@ -200,6 +224,59 @@ function Page() {
     }
 
     constructor();
+}
+
+function handlePaste(elem, e) {
+    e.preventDefault();
+    var savedcontent = elem.innerHTML;
+    if (e && e.clipboardData && e.clipboardData.getData) {// Webkit - get data from clipboard, put into editdiv, cleanup, then cancel event
+        if (/text\/html/.test(e.clipboardData.types)) {
+            elem.innerHTML = e.clipboardData.getData('text/html');
+        }
+        else if (/text\/plain/.test(e.clipboardData.types)) {
+            elem.innerHTML = e.clipboardData.getData('text/plain');
+        }
+        else {
+            elem.innerHTML = "";
+        }
+        waitForPasteData(elem, savedcontent);
+        if (e.preventDefault) {
+            e.stopPropagation();
+            e.preventDefault();
+        }
+        return false;
+    }
+    else {// Everything else - empty editdiv and allow browser to paste content into it, then cleanup
+        elem.innerHTML = "";
+        waitForPasteData(elem, savedcontent);
+        return true;
+    }
+}
+
+function waitForPasteData(elem, savedcontent) {
+    if (elem.childNodes && elem.childNodes.length > 0) {
+        processPaste(elem, savedcontent);
+    }
+    else {
+        that = {
+            e: elem,
+            s: savedcontent
+        }
+        that.callself = function () {
+            waitForPasteData(that.e, that.s)
+        }
+        setTimeout(that.callself, 20);
+    }
+}
+
+function processPaste(elem, savedcontent) {
+    pasteddata = elem.innerHTML;
+    //^^Alternatively loop through dom (elem.childNodes or elem.getElementsByTagName) here
+
+    elem.innerHTML = savedcontent;
+
+    // Do whatever with gathered data;
+    console.log(pasteddata);
 }
 
 
