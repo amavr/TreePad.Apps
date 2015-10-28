@@ -74,9 +74,9 @@ function Page() {
         });
 
         $text_box.keydown(function (e) {
-            e.preventDefault();
-
             if (e.keyCode === 13) {
+                e.preventDefault();
+
                 try {
                     var range = window.getSelection().getRangeAt(0);
                     var pos = range.endOffset;
@@ -92,7 +92,13 @@ function Page() {
         });
 
         $text_box.on('paste', function (e) {
-            // handlePaste(this, e);
+            if (e.originalEvent.clipboardData) {
+                var text = (e.originalEvent || e).clipboardData.getData('text/plain');
+                if (text === '') return;
+                
+                e.preventDefault();
+                document.execCommand('insertHTML', false, text);
+            }
         });
 
 
@@ -210,9 +216,9 @@ function Page() {
         $files.on('click', function (e) {
             e.preventDefault();
             console.log(e.target);
-            file_id = e.target.id;
+            current_file_id = e.target.id;
             me.showWait(true);
-            gdocs.loadFile(file_id, function (title, data) {
+            gdocs.loadFile(current_file_id, function (title, data) {
 
                 file_title = title;
                 onLoadFile(data);
@@ -225,60 +231,6 @@ function Page() {
 
     constructor();
 }
-
-function handlePaste(elem, e) {
-    e.preventDefault();
-    var savedcontent = elem.innerHTML;
-    if (e && e.clipboardData && e.clipboardData.getData) {// Webkit - get data from clipboard, put into editdiv, cleanup, then cancel event
-        if (/text\/html/.test(e.clipboardData.types)) {
-            elem.innerHTML = e.clipboardData.getData('text/html');
-        }
-        else if (/text\/plain/.test(e.clipboardData.types)) {
-            elem.innerHTML = e.clipboardData.getData('text/plain');
-        }
-        else {
-            elem.innerHTML = "";
-        }
-        waitForPasteData(elem, savedcontent);
-        if (e.preventDefault) {
-            e.stopPropagation();
-            e.preventDefault();
-        }
-        return false;
-    }
-    else {// Everything else - empty editdiv and allow browser to paste content into it, then cleanup
-        elem.innerHTML = "";
-        waitForPasteData(elem, savedcontent);
-        return true;
-    }
-}
-
-function waitForPasteData(elem, savedcontent) {
-    if (elem.childNodes && elem.childNodes.length > 0) {
-        processPaste(elem, savedcontent);
-    }
-    else {
-        that = {
-            e: elem,
-            s: savedcontent
-        }
-        that.callself = function () {
-            waitForPasteData(that.e, that.s)
-        }
-        setTimeout(that.callself, 20);
-    }
-}
-
-function processPaste(elem, savedcontent) {
-    pasteddata = elem.innerHTML;
-    //^^Alternatively loop through dom (elem.childNodes or elem.getElementsByTagName) here
-
-    elem.innerHTML = savedcontent;
-
-    // Do whatever with gathered data;
-    console.log(pasteddata);
-}
-
 
 $(function () {
     console.log('page loaded');
