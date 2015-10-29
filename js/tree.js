@@ -1,34 +1,48 @@
-﻿function Tree(tree_box_id, text_box_id, data) {
+﻿function Tree(tree_box, text_box) {
 
     var me = this;
-    var $tree_box = $(tree_box_id);
-    var $text_box = $(text_box_id);
+    var $tree_box = tree_box;
+    var $text_box = text_box;
     var $ul = null;
 
     var items = [];
     var selected = null;
 
+    var getSelected = function(){
+        return selected_node;
+    }
+    
     var append = function (article) {
         items.push(article)
     }
 
+    var clear = function(){
+        for(var i = 0; i < items.length; i++){
+            delete items[i];
+        }
+        items = [];
+        $text_box.text('');
+        
+        $ul = $('<ul></ul>');
+        $tree_box.html('');
+        $tree_box.append($ul);
+
+        selected = null;
+    }
+
     var switchState = function (e) {
-        console.log(e);
         var a = $(e).data('article');
-        console.log(a);
     }
 
     var tbox2node = function () {
         if (selected) {
-            selected.text = $text_box[0].innerText;
-            // эта конструкция не сохраняет переводы строк
-            // selected.text = $text_box.text();
+            selected.text = $text_box.html();
         }
     }
 
     var node2tbox = function () {
         var text = (selected) ? selected.text : '';
-        $text_box.text(text);
+        $text_box.html(text);
     }
 
     var onSelect = function (node) {
@@ -55,6 +69,12 @@
             });
     }
 
+    var onEmptyAreaClick = function(e){
+        e.stopPropagation();
+        onSelect(null);
+        $("li > span.selected", $tree_box).removeClass("selected");
+    }
+
     this.add = function (data) {
         var ul = (selected == null) ? $ul : selected.ul();
         var node = new Article(ul, data, true, onSelect);
@@ -79,11 +99,12 @@
                 }
             }
             $li.remove();
+            selected = null;
             if ($new_li.length > 0) {
                 selected = $new_li.data('article');
                 $new_li.find('> span').addClass('selected');
                 var data = $new_li.data('article');
-                console.log(data);
+                node2tbox();
             }
         }
     }
@@ -115,23 +136,9 @@
         return data;
     }
 
-    var constructor = function () {
-        
-        $text_box.text('');
-        
-        console.log($tree_box);
-        
-        $ul = $('<ul></ul>');
-        $tree_box.html('');
-        $tree_box.append($ul);
+    this.load = function(data){
 
-        $tree_box.bind('click', function (e) {
-            e.stopPropagation();
-            $("li > span.selected", $tree_box).removeClass("selected");
-            onSelect(null);
-        });
-       
-        if(!$tree_box.hasClass('tree')) $tree_box.addClass('tree');
+        clear();
 
         if (data != undefined && data.length > 0) {
             for (var i = 0; i < data.length; i++) {
@@ -140,6 +147,11 @@
         }
         
         initHandlers();
+    }
+
+    var constructor = function () {
+        tree_box.bind('click', onEmptyAreaClick);
+        if(!$tree_box.hasClass('tree')) $tree_box.addClass('tree');
     }
 
     constructor();

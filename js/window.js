@@ -2,7 +2,7 @@ function Page() {
 
     var me = this;
 
-    var $files, $work, $text_box;
+    var $files, $work, $tree_box, $text_box;
     var $btn_open;
     var $body;
 
@@ -38,7 +38,7 @@ function Page() {
     }
 
     var onLoadFile = function (data) {
-        tree = new Tree('#tree-box', $text_box, data);
+        tree.load(data);
     }
 
     var initHandlers = function () {
@@ -207,6 +207,7 @@ function Page() {
         $files = $('#files-box');
         $work = $('#work-box');
         $text_box = $('#text-box', $work);
+        $tree_box = $('#tree-box', $work);
         $btn_open = $('#btn-open');
         $btn_open.data('files', false);
         $btn_open.on('click', me.showFiles);
@@ -227,6 +228,8 @@ function Page() {
                 me.showWait(false);
             });
         });
+        
+        tree = new Tree($tree_box, $text_box);
     }
 
     constructor();

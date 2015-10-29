@@ -118,8 +118,9 @@ function Article($parentUl, data, visible, onSelect) {
         $sign.bind('click', switchState);
 
         $span.bind('click', function (e) {
+            // e.preventDefault();
             e.stopPropagation();
-            console.log(e);
+            // console.log(e);
             me.select();
         });
 
