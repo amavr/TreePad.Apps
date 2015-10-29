@@ -103,7 +103,6 @@
             if ($new_li.length > 0) {
                 selected = $new_li.data('article');
                 $new_li.find('> span').addClass('selected');
-                var data = $new_li.data('article');
                 node2tbox();
             }
         }
@@ -145,13 +144,17 @@
                 append(new Article($ul, data[i], true, onSelect));
             }
         }
-        
-        initHandlers();
+       
     }
 
     var constructor = function () {
+        
+        clear();
+        
         tree_box.bind('click', onEmptyAreaClick);
         if(!$tree_box.hasClass('tree')) $tree_box.addClass('tree');
+        
+        initHandlers();
     }
 
     constructor();
